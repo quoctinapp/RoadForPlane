@@ -99,7 +99,8 @@ const App = {
     });
 
     document.getElementById('showAllChk').addEventListener('change', (e) => {
-      this.setShowAll(e.target.checked);
+      MapView.setShowAll(e.target.checked);
+      this.drawMap();
     });
 
     document.querySelectorAll('.lang-toggle button').forEach(btn => {
@@ -266,6 +267,9 @@ const App = {
     const rr = seg.reroute;
     const changed = rr && (!rr.newRoute || !samePath(rr.newRoute.path, rr.oldRoute.path));
     MapView.drawOldPath(changed ? rr.oldRoute.path : null);
+
+    if (document.getElementById('showAllChk').checked) MapView.fitAll();
+    else MapView.fitPaths([route ? route.path : [seg.from, seg.to], changed ? rr.oldRoute.path : null]);
   },
 
   renderDateStrip() {

@@ -13,6 +13,7 @@ const Simulator = {
     this.nodes = nodes;
     this.mode = mode;
     this.info = info || null;
+    this.lastFit = null;
     this.index = -1;
     this.render();
   },
@@ -61,6 +62,7 @@ const Simulator = {
 
   reset() {
     this.pause();
+    this.lastFit = null;
     this.index = -1;
     this.render();
     if (this.onReset) this.onReset();
@@ -97,6 +99,14 @@ const Simulator = {
 
       if (step.type === 'path') MapView.drawPath(step.path);
       else MapView.clearPath();
+      if (step.type === 'init' && this.lastFit !== 'all') {
+        MapView.fitAll();
+        this.lastFit = 'all';
+      }
+      if (step.type === 'path' && this.lastFit !== 'path') {
+        MapView.fitPaths([step.path]);
+        this.lastFit = 'path';
+      }
     }
 
     this.renderTable(step);

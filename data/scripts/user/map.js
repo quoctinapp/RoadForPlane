@@ -41,10 +41,46 @@ const MapView = {
     this.drawCities();
     this.updateLanguage();
 
-    const bounds = CITIES.map(c => [c.lat, c.lng]).concat(SEA_LABELS.map(l => [l.lat, l.lng]));
+    const ViewAll = L.Control.extend({
+      options: { position: 'topleft' },
+      onAdd: () => {
+        const btn = L.DomUtil.create('button', 'view-all-btn leaflet-bar');
+        btn.type = 'button';
+        btn.textContent = '⤢';
+        L.DomEvent.disableClickPropagation(btn);
+        L.DomEvent.on(btn, 'click', () => this.fitAll());
+        this.viewAllBtn = btn;
+        return btn;
+      }
+    });
+    new ViewAll().addTo(this.map);
+
     this.map.on('zoomend', () => this.updateZoomClass());
-    this.map.fitBounds(bounds, { padding: [30, 30] });
+    this.map.fitBounds(this.allBounds(), { padding: [30, 30] });
     this.updateZoomClass();
+  },
+
+  allBounds() {
+    return CITIES.map(c => [c.lat, c.lng]).concat(SEA_LABELS.map(l => [l.lat, l.lng]));
+  },
+
+  fitAll() {
+    this.map.flyToBounds(this.allBounds(), { padding: [30, 30], duration: 0.8 });
+  },
+
+  fitPaths(paths) {
+    let points = [];
+    for (const path of paths) {
+      if (!path || !path.length) continue;
+      points = points.concat(path.length > 1 ? this.pathPoints(path) : [[getCity(path[0]).lat, getCity(path[0]).lng]]);
+    }
+    if (!points.length) return this.fitAll();
+    this.map.flyToBounds(points, {
+      paddingTopLeft: [60, 60],
+      paddingBottomRight: [290, 60],
+      maxZoom: 8,
+      duration: 0.8
+    });
   },
 
   updateZoomClass() {
@@ -53,6 +89,7 @@ const MapView = {
 
   updateLanguage() {
     this.updateCityLabels();
+    if (this.viewAllBtn) this.viewAllBtn.title = t('viewAll');
 
     if (this.layerControl) this.layerControl.remove();
     const layers = {};
