@@ -58,7 +58,7 @@ const App = {
     });
 
     document.getElementById('showAllChk').addEventListener('change', (e) => {
-      MapView.setShowAll(e.target.checked);
+      this.setShowAll(e.target.checked);
     });
 
     document.querySelectorAll('.lang-toggle button').forEach(btn => {
@@ -80,6 +80,11 @@ const App = {
     document.getElementById('playBtn').addEventListener('click', () => Simulator.togglePlay());
     document.getElementById('stepBtn').addEventListener('click', () => Simulator.stepOnce());
     document.getElementById('resetBtn').addEventListener('click', () => Simulator.reset());
+  },
+
+  setShowAll(show) {
+    document.getElementById('showAllChk').checked = show;
+    MapView.setShowAll(show);
   },
 
   updateToggles() {
@@ -160,6 +165,7 @@ const App = {
         '<span class="day-price" style="display:block">' + (v.total === Infinity ? '—' : formatWeight(v.total, mode)) + '</span>';
       btn.addEventListener('click', () => {
         this.state.date = v.date;
+        this.setShowAll(false);
         this.search();
       });
       strip.appendChild(btn);
@@ -224,6 +230,7 @@ const App = {
       li.addEventListener('click', () => {
         this.selected = i;
         Simulator.pause();
+        this.setShowAll(false);
         this.renderRoutes();
         this.renderDetails();
         this.drawSelectedRoute();

@@ -18,6 +18,7 @@ const MapView = {
   planeFrame: null,
   tiers: null,
   showAll: true,
+  focusKeys: new Set(),
 
   init(elementId) {
     this.map = L.map(elementId, { zoomControl: true, attributionControl: true })
@@ -141,7 +142,7 @@ const MapView = {
     this.showAll = show;
     for (const key in this.arcs) {
       const el = this.arcs[key].getElement();
-      if (el) el.classList.toggle('dim', !show);
+      if (el) el.classList.toggle('dim', !show && !this.focusKeys.has(key));
     }
   },
 
@@ -198,9 +199,12 @@ const MapView = {
 
     let allPoints = [];
     for (let i = 0; i < path.length - 1; i++) {
-      const points = this.arcPoints[path[i] + '-' + path[i + 1]];
+      const key = path[i] + '-' + path[i + 1];
+      this.focusKeys.add(key);
+      const points = this.arcPoints[key];
       if (points) allPoints = allPoints.concat(points);
     }
+    this.setShowAll(this.showAll);
 
     const glow = L.polyline(allPoints, { color: '#38bdf8', weight: 9, opacity: 0.35, className: 'path-glow', interactive: false });
     const line = L.polyline(allPoints, { color: '#e0f2fe', weight: 3, opacity: 1, className: 'path-dash', interactive: false });
@@ -215,6 +219,10 @@ const MapView = {
     this.planeFrame = null;
     if (this.plane) this.plane.remove();
     this.plane = null;
+    if (this.focusKeys.size) {
+      this.focusKeys.clear();
+      this.setShowAll(this.showAll);
+    }
   },
 
   animatePlane(points) {

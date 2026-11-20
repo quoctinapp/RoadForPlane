@@ -650,7 +650,8 @@ select {
 }
 
 .flight-arc.dim {
-  stroke-opacity: .07;
+  stroke-opacity: 0;
+  pointer-events: none;
 }
 
 .flight-arc.flash-update {
