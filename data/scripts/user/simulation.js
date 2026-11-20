@@ -5,12 +5,14 @@ const Simulator = {
   nodes: [],
   mode: 'price',
   onReset: null,
+  info: null,
 
-  load(result, nodes, mode) {
+  load(result, nodes, mode, info) {
     this.pause();
     this.steps = result.steps;
     this.nodes = nodes;
     this.mode = mode;
+    this.info = info || null;
     this.index = -1;
     this.render();
   },
@@ -72,6 +74,7 @@ const Simulator = {
   render() {
     const step = this.index >= 0 ? this.steps[this.index] : null;
     MapView.clearSimulation();
+    document.getElementById('simInfo').textContent = this.info ? t(this.info.key, this.info.params) : '';
 
     document.getElementById('stepCounter').textContent =
       this.steps.length ? t('stepOf', { i: this.index + 1, n: this.steps.length }) : '';

@@ -29,10 +29,19 @@
           <span data-i18n="from"></span>
           <select id="fromSelect"></select>
         </label>
+        <div class="field">
+          <span data-i18n="stopsLabel"></span>
+          <div id="stopsList" class="stops-list"></div>
+          <button type="button" id="addStopBtn" class="ghost-btn small" data-i18n="addStop"></button>
+        </div>
         <button type="button" id="swapBtn" class="swap-btn" data-i18n-title="swap">⇅</button>
         <label class="field">
           <span data-i18n="to"></span>
           <select id="toSelect"></select>
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" id="roundTripChk">
+          <span data-i18n="roundTrip"></span>
         </label>
         <div class="field">
           <span data-i18n="criterion"></span>
@@ -42,7 +51,7 @@
           </div>
         </div>
         <label class="checkbox">
-          <input type="checkbox" id="showAllChk" checked>
+          <input type="checkbox" id="showAllChk">
           <span data-i18n="showAll"></span>
         </label>
         <button type="submit" class="primary-btn" data-i18n="search"></button>
@@ -52,13 +61,14 @@
         <div id="summary"></div>
       </section>
       <section class="card routes-card">
+        <div id="segmentTabs" class="segment-tabs"></div>
         <h2 id="routesTitle"></h2>
         <ul id="routesList" class="routes-list"></ul>
       </section>
     </aside>
     <section class="center">
       <div class="date-strip-wrap">
-        <span class="date-label" data-i18n="date"></span>
+        <span class="date-label" id="dateLabel"></span>
         <div id="dateStrip" class="date-strip"></div>
       </div>
       <div class="map-wrap">
@@ -67,12 +77,22 @@
       </div>
     </section>
     <aside class="panel panel-right">
+      <section class="card reroute-card" id="rerouteCard" hidden>
+        <h2 data-i18n="rerouteTitle"></h2>
+        <div id="reroute"></div>
+      </section>
       <section class="card">
         <h2 data-i18n="flightDetails"></h2>
         <div id="details"></div>
       </section>
+      <section class="card" id="incidentsCard" hidden>
+        <h2 data-i18n="incidentsTitle"></h2>
+        <ul id="incidentsList" class="incidents-list"></ul>
+        <button type="button" id="clearIncidentsBtn" class="ghost-btn small" data-i18n="clearIncidents"></button>
+      </section>
       <section class="card sim-card">
         <h2 data-i18n="simTitle"></h2>
+        <p id="simInfo" class="sim-info"></p>
         <div class="sim-controls">
           <button type="button" id="playBtn" class="primary-btn small">▶ <span data-i18n="play"></span></button>
           <button type="button" id="stepBtn" class="ghost-btn small">⏭ <span data-i18n="step"></span></button>
@@ -105,6 +125,7 @@
   <script src="data/scripts/user/graph.js"></script>
   <script src="data/scripts/user/dijkstra.js"></script>
   <script src="data/scripts/user/paths.js"></script>
+  <script src="data/scripts/user/trip.js"></script>
   <script src="data/scripts/user/map.js"></script>
   <script src="data/scripts/user/simulation.js"></script>
   <script src="data/scripts/user/app.js"></script>

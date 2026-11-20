@@ -2,46 +2,52 @@ const DATA_YEAR = 2026;
 const DATA_MONTH = 12;
 
 const CITIES = [
-  { code: 'HAN', name: { vi: 'Hà Nội',        en: 'Hanoi' },            airport: 'Nội Bài',     lat: 21.2187, lng: 105.8042, label: 'left' },
-  { code: 'SGN', name: { vi: 'TP. Hồ Chí Minh', en: 'Ho Chi Minh City' }, airport: 'Tân Sơn Nhất', lat: 10.8188, lng: 106.6519, label: 'left' },
-  { code: 'HPH', name: { vi: 'Hải Phòng',     en: 'Hai Phong' },        airport: 'Cát Bi',      lat: 20.8194, lng: 106.7250, label: 'right' },
-  { code: 'DAD', name: { vi: 'Đà Nẵng',       en: 'Da Nang' },          airport: 'Đà Nẵng',     lat: 16.0439, lng: 108.1994, label: 'right' },
-  { code: 'VCA', name: { vi: 'Cần Thơ',       en: 'Can Tho' },          airport: 'Cần Thơ',     lat: 10.0851, lng: 105.7117, label: 'left' },
-  { code: 'HUI', name: { vi: 'Huế',           en: 'Hue' },              airport: 'Phú Bài',     lat: 16.4015, lng: 107.7026, label: 'left' },
-  { code: 'LTH', name: { vi: 'Đồng Nai',      en: 'Dong Nai' },         airport: 'Long Thành',  lat: 10.7980, lng: 107.0450, label: 'right' },
-  { code: 'VDO', name: { vi: 'Quảng Ninh',    en: 'Quang Ninh' },       airport: 'Vân Đồn',     lat: 21.1178, lng: 107.4142, label: 'right' },
-  { code: 'GBN', name: { vi: 'Bắc Ninh',      en: 'Bac Ninh' },         airport: 'Gia Bình',    lat: 21.0600, lng: 106.2000, label: 'top' }
+  { code: 'HAN', name: { vi: 'Hà Nội', en: 'Hanoi' }, airport: 'Nội Bài', lat: 21.2187, lng: 105.8042, label: 'left' },
+  { code: 'HPH', name: { vi: 'Hải Phòng', en: 'Hai Phong' }, airport: 'Cát Bi', lat: 20.8194, lng: 106.7250, label: 'right' },
+  { code: 'VDO', name: { vi: 'Quảng Ninh', en: 'Quang Ninh' }, airport: 'Vân Đồn', lat: 21.1178, lng: 107.4142, label: 'right' },
+  { code: 'DIN', name: { vi: 'Điện Biên', en: 'Dien Bien' }, airport: 'Điện Biên Phủ', lat: 21.3975, lng: 103.0078, label: 'right' },
+  { code: 'THD', name: { vi: 'Thanh Hóa', en: 'Thanh Hoa' }, airport: 'Thọ Xuân', lat: 19.9017, lng: 105.4678, label: 'left' },
+  { code: 'VII', name: { vi: 'Vinh', en: 'Vinh' }, airport: 'Vinh', lat: 18.7376, lng: 105.6708, label: 'left' },
+  { code: 'VDH', name: { vi: 'Đồng Hới', en: 'Dong Hoi' }, airport: 'Đồng Hới', lat: 17.5150, lng: 106.5906, label: 'left' },
+  { code: 'HUI', name: { vi: 'Huế', en: 'Hue' }, airport: 'Phú Bài', lat: 16.4015, lng: 107.7026, label: 'left' },
+  { code: 'DAD', name: { vi: 'Đà Nẵng', en: 'Da Nang' }, airport: 'Đà Nẵng', lat: 16.0439, lng: 108.1994, label: 'right' },
+  { code: 'VCL', name: { vi: 'Chu Lai', en: 'Chu Lai' }, airport: 'Chu Lai', lat: 15.4033, lng: 108.7061, label: 'right' },
+  { code: 'UIH', name: { vi: 'Quy Nhơn', en: 'Quy Nhon' }, airport: 'Phù Cát', lat: 13.9550, lng: 109.0422, label: 'right' },
+  { code: 'PXU', name: { vi: 'Pleiku', en: 'Pleiku' }, airport: 'Pleiku', lat: 14.0045, lng: 108.0172, label: 'left' },
+  { code: 'TBB', name: { vi: 'Tuy Hòa', en: 'Tuy Hoa' }, airport: 'Tuy Hòa', lat: 13.0496, lng: 109.3337, label: 'right' },
+  { code: 'BMV', name: { vi: 'Buôn Ma Thuột', en: 'Buon Ma Thuot' }, airport: 'Buôn Ma Thuột', lat: 12.6683, lng: 108.1203, label: 'left' },
+  { code: 'CXR', name: { vi: 'Nha Trang', en: 'Nha Trang' }, airport: 'Cam Ranh', lat: 11.9982, lng: 109.2194, label: 'right' },
+  { code: 'DLI', name: { vi: 'Đà Lạt', en: 'Da Lat' }, airport: 'Liên Khương', lat: 11.7500, lng: 108.3667, label: 'left' },
+  { code: 'SGN', name: { vi: 'TP. Hồ Chí Minh', en: 'Ho Chi Minh City' }, airport: 'Tân Sơn Nhất', lat: 10.8188, lng: 106.6519, label: 'right' },
+  { code: 'VCS', name: { vi: 'Côn Đảo', en: 'Con Dao' }, airport: 'Côn Đảo', lat: 8.7318, lng: 106.6330, label: 'right' },
+  { code: 'VCA', name: { vi: 'Cần Thơ', en: 'Can Tho' }, airport: 'Cần Thơ', lat: 10.0851, lng: 105.7117, label: 'right' },
+  { code: 'VKG', name: { vi: 'Rạch Giá', en: 'Rach Gia' }, airport: 'Rạch Giá', lat: 9.9580, lng: 105.1324, label: 'left' },
+  { code: 'PQC', name: { vi: 'Phú Quốc', en: 'Phu Quoc' }, airport: 'Phú Quốc', lat: 10.1698, lng: 103.9931, label: 'left' },
+  { code: 'CAH', name: { vi: 'Cà Mau', en: 'Ca Mau' }, airport: 'Cà Mau', lat: 9.1777, lng: 105.1777, label: 'left' }
 ];
 
 const AIRLINES = [
-  { code: 'VN', name: 'Vietnam Airlines',   factor: 1.15 },
-  { code: 'VJ', name: 'Vietjet Air',        factor: 0.85 },
-  { code: 'QH', name: 'Bamboo Airways',     factor: 1.00 },
+  { code: 'VN', name: 'Vietnam Airlines', factor: 1.15 },
+  { code: 'VJ', name: 'Vietjet Air', factor: 0.85 },
+  { code: 'QH', name: 'Bamboo Airways', factor: 1.00 },
   { code: 'VU', name: 'Vietravel Airlines', factor: 0.92 }
 ];
 
-const ROUTES = [
-  { a: 'HAN', b: 'SGN', price: 2100000, duration: 130 },
-  { a: 'HAN', b: 'DAD', price:  900000, duration:  80 },
-  { a: 'HAN', b: 'HUI', price:  950000, duration:  75 },
-  { a: 'HAN', b: 'VCA', price: 2000000, duration: 130 },
-  { a: 'HAN', b: 'LTH', price: 2050000, duration: 125 },
-  { a: 'SGN', b: 'DAD', price:  750000, duration:  80 },
-  { a: 'SGN', b: 'HPH', price: 2000000, duration: 125 },
-  { a: 'SGN', b: 'HUI', price:  850000, duration:  85 },
-  { a: 'SGN', b: 'VDO', price: 2200000, duration: 135 },
-  { a: 'SGN', b: 'GBN', price: 2150000, duration: 130 },
-  { a: 'HPH', b: 'DAD', price:  950000, duration:  85 },
-  { a: 'HPH', b: 'VCA', price: 2100000, duration: 135 },
-  { a: 'DAD', b: 'VCA', price:  900000, duration:  90 },
-  { a: 'DAD', b: 'VDO', price: 1100000, duration:  95 },
-  { a: 'DAD', b: 'LTH', price:  800000, duration:  80 },
-  { a: 'DAD', b: 'GBN', price: 1000000, duration:  85 },
-  { a: 'HUI', b: 'LTH', price:  900000, duration:  85 },
-  { a: 'HUI', b: 'VDO', price: 1050000, duration:  90 },
-  { a: 'VCA', b: 'VDO', price: 2300000, duration: 140 },
-  { a: 'GBN', b: 'LTH', price: 2000000, duration: 125 }
+const ROUTE_PAIRS = [
+  'HAN-SGN', 'HAN-DAD', 'HAN-HUI', 'HAN-DIN', 'HAN-VCL', 'HAN-UIH', 'HAN-PXU', 'HAN-TBB',
+  'HAN-BMV', 'HAN-CXR', 'HAN-DLI', 'HAN-VCA', 'HAN-PQC', 'HAN-VCS',
+  'SGN-HPH', 'SGN-VDO', 'SGN-THD', 'SGN-VII', 'SGN-VDH', 'SGN-HUI', 'SGN-DAD', 'SGN-VCL',
+  'SGN-UIH', 'SGN-PXU', 'SGN-TBB', 'SGN-BMV', 'SGN-CXR', 'SGN-DLI', 'SGN-VCS', 'SGN-VKG',
+  'SGN-PQC', 'SGN-CAH',
+  'DAD-HPH', 'DAD-VCA', 'DAD-DLI', 'DAD-CXR', 'DAD-PQC',
+  'HPH-CXR', 'HPH-PQC', 'HPH-BMV', 'HPH-DLI', 'HPH-VCA', 'HPH-UIH', 'HPH-PXU',
+  'VII-DLI', 'VII-BMV', 'VII-PXU', 'VII-CXR', 'VII-PQC',
+  'THD-DLI', 'THD-CXR', 'THD-BMV', 'THD-PQC',
+  'VCA-PQC', 'VCA-VCS'
 ];
+
+const PRICE_BASE = 300000;
+const PRICE_PER_KM = 1150;
 
 function mulberry32(seed) {
   return function () {
@@ -73,6 +79,29 @@ function toDateString(year, month, day) {
 function minutesToClock(totalMinutes) {
   const m = ((totalMinutes % 1440) + 1440) % 1440;
   return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+}
+
+function distanceKm(a, b) {
+  const rad = Math.PI / 180;
+  const dLat = (b.lat - a.lat) * rad;
+  const dLng = (b.lng - a.lng) * rad;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLng / 2) ** 2;
+  return 2 * 6371 * Math.asin(Math.sqrt(h));
+}
+
+function buildRoutes() {
+  return ROUTE_PAIRS.map(pair => {
+    const [a, b] = pair.split('-');
+    const km = distanceKm(getCity(a), getCity(b));
+    const factor = 0.7 + mulberry32(hashString(pair))() * 0.7;
+    return {
+      a: a,
+      b: b,
+      km: Math.round(km),
+      price: roundPrice((PRICE_BASE + km * PRICE_PER_KM) * factor),
+      duration: Math.round((25 + km * 0.075) / 5) * 5
+    };
+  });
 }
 
 function dayFactor(year, month, day) {
@@ -128,12 +157,25 @@ function generateFlights(year, month) {
   return flights;
 }
 
-const FLIGHTS = generateFlights(DATA_YEAR, DATA_MONTH);
-
 function getCity(code) {
   return CITIES.find(c => c.code === code);
 }
 
+const ROUTES = buildRoutes();
+const FLIGHTS = generateFlights(DATA_YEAR, DATA_MONTH);
+const FLIGHTS_BY_DATE = {};
+for (const f of FLIGHTS) {
+  if (!FLIGHTS_BY_DATE[f.date]) FLIGHTS_BY_DATE[f.date] = [];
+  FLIGHTS_BY_DATE[f.date].push(f);
+}
+
+function flightsOn(date) {
+  return FLIGHTS_BY_DATE[date] || [];
+}
+
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { DATA_YEAR, DATA_MONTH, CITIES, AIRLINES, ROUTES, FLIGHTS, generateFlights, getCity, toDateString };
+  module.exports = {
+    DATA_YEAR, DATA_MONTH, CITIES, AIRLINES, ROUTES, FLIGHTS, FLIGHTS_BY_DATE,
+    generateFlights, getCity, toDateString, flightsOn, roundPrice, minutesToClock
+  };
 }

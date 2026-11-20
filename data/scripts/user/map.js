@@ -17,8 +17,11 @@ const MapView = {
   plane: null,
   planeFrame: null,
   tiers: null,
-  showAll: true,
+  showAll: false,
   focusKeys: new Set(),
+  overlayLayers: [],
+  oldLayers: [],
+  onAirportClick: null,
 
   init(elementId) {
     this.map = L.map(elementId, { zoomControl: true, attributionControl: true })
@@ -39,7 +42,13 @@ const MapView = {
     this.updateLanguage();
 
     const bounds = CITIES.map(c => [c.lat, c.lng]).concat(SEA_LABELS.map(l => [l.lat, l.lng]));
+    this.map.on('zoomend', () => this.updateZoomClass());
     this.map.fitBounds(bounds, { padding: [30, 30] });
+    this.updateZoomClass();
+  },
+
+  updateZoomClass() {
+    this.map.getContainer().classList.toggle('zoom-low', this.map.getZoom() < 7);
   },
 
   updateLanguage() {
@@ -66,8 +75,11 @@ const MapView = {
         html: '<div class="city-marker lp-' + city.label + '" data-code="' + city.code + '">' +
               '<span class="dot"></span><span class="label"></span><span class="badge"></span></div>'
       });
-      this.markers[city.code] = L.marker([city.lat, city.lng], { icon: icon, zIndexOffset: 1000 })
-        .addTo(this.map);
+      const marker = L.marker([city.lat, city.lng], { icon: icon, zIndexOffset: 1000 }).addTo(this.map);
+      marker.on('click', () => {
+        if (this.onAirportClick) this.onAirportClick(city.code);
+      });
+      this.markers[city.code] = marker;
     }
     this.updateCityLabels();
   },
@@ -80,7 +92,33 @@ const MapView = {
   updateCityLabels() {
     for (const city of CITIES) {
       const el = this.markerEl(city.code);
-      if (el) el.querySelector('.label').textContent = city.name[currentLang] + ' (' + city.code + ')';
+      if (el) {
+        el.querySelector('.label').innerHTML =
+          '<span class="code">' + city.code + '</span><span class="name"> · ' + city.name[currentLang] + '</span>';
+      }
+      this.markers[city.code].unbindTooltip().bindTooltip(
+        city.name[currentLang] + ' (' + city.code + ') – ' + city.airport,
+        { direction: 'top', offset: [0, -8], className: 'arc-tip' }
+      );
+    }
+  },
+
+  showPopup(code, content) {
+    const city = getCity(code);
+    L.popup({ className: 'airport-popup', offset: [0, -6] })
+      .setLatLng([city.lat, city.lng])
+      .setContent(content)
+      .openOn(this.map);
+  },
+
+  closePopup() {
+    this.map.closePopup();
+  },
+
+  setClosedAirports(codes) {
+    for (const code in this.markers) {
+      const el = this.markerEl(code);
+      if (el) el.classList.toggle('closed', codes.includes(code));
     }
   },
 
@@ -146,13 +184,40 @@ const MapView = {
     }
   },
 
-  setEndpoints(from, to) {
+  setEndpoints(from, to, stops = []) {
     for (const code in this.markers) {
       const el = this.markerEl(code);
       if (!el) continue;
       el.classList.toggle('start', code === from);
       el.classList.toggle('end', code === to);
+      el.classList.toggle('stop', stops.includes(code) && code !== from && code !== to);
     }
+  },
+
+  pathPoints(path) {
+    let points = [];
+    for (let i = 0; i < path.length - 1; i++) {
+      points = points.concat(this.computeArc(getCity(path[i]), getCity(path[i + 1])));
+    }
+    return points;
+  },
+
+  drawTrip(paths) {
+    this.overlayLayers.forEach(layer => layer.remove());
+    this.overlayLayers = paths
+      .filter(path => path.length > 1)
+      .map(path => L.polyline(this.pathPoints(path), {
+        color: '#c084fc', weight: 2.5, opacity: 0.85, dashArray: '2 6', interactive: false
+      }).addTo(this.map));
+  },
+
+  drawOldPath(path) {
+    this.oldLayers.forEach(layer => layer.remove());
+    this.oldLayers = [];
+    if (!path || path.length < 2) return;
+    this.oldLayers.push(L.polyline(this.pathPoints(path), {
+      color: '#ef4444', weight: 3, opacity: 0.9, dashArray: '8 8', interactive: false
+    }).addTo(this.map));
   },
 
   setNodeState(code, state) {
@@ -255,7 +320,10 @@ const MapView = {
       '<div class="legend-row"><span class="legend-dot" style="background:var(--start)"></span>' + t('legendStart') + '</div>' +
       '<div class="legend-row"><span class="legend-dot" style="background:var(--end)"></span>' + t('legendEnd') + '</div>' +
       '<div class="legend-row"><span class="legend-dot" style="background:var(--accent)"></span>' + t('legendCity') + '</div>' +
+      '<div class="legend-row"><span class="legend-dot" style="background:var(--stop)"></span>' + t('legendStop') + '</div>' +
       '<div class="legend-row"><span class="legend-line" style="background:#38bdf8;box-shadow:0 0 6px #38bdf8"></span>' + t('legendOptimal') + '</div>' +
+      '<div class="legend-row"><span class="legend-line dashed" style="border-color:#c084fc"></span>' + t('legendOther') + '</div>' +
+      '<div class="legend-row"><span class="legend-line dashed" style="border-color:#ef4444"></span>' + t('legendOld') + '</div>' +
       '<div class="legend-sub">' + t('legendPrice') + '</div>';
 
     if (this.tiers) {
