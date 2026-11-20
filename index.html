@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlightPath – Dijkstra</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="data/ui/lib/leaflet.css">
+  <link rel="stylesheet" href="data/ui/user/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-icon">✈</span>
+      <div>
+        <h1>FLIGHT<span>PATH</span></h1>
+        <p data-i18n="appSubtitle"></p>
+      </div>
+    </div>
+    <div class="lang-toggle" role="group">
+      <button type="button" data-lang="vi">VI</button>
+      <button type="button" data-lang="en">EN</button>
+    </div>
+  </header>
+  <main class="layout">
+    <aside class="panel panel-left">
+      <form id="searchForm" class="card search-card">
+        <label class="field">
+          <span data-i18n="from"></span>
+          <select id="fromSelect"></select>
+        </label>
+        <button type="button" id="swapBtn" class="swap-btn" data-i18n-title="swap">⇅</button>
+        <label class="field">
+          <span data-i18n="to"></span>
+          <select id="toSelect"></select>
+        </label>
+        <div class="field">
+          <span data-i18n="criterion"></span>
+          <div class="segmented" id="modeToggle">
+            <button type="button" data-mode="price" data-i18n="cheapest"></button>
+            <button type="button" data-mode="time" data-i18n="fastest"></button>
+          </div>
+        </div>
+        <label class="checkbox">
+          <input type="checkbox" id="showAllChk" checked>
+          <span data-i18n="showAll"></span>
+        </label>
+        <button type="submit" class="primary-btn" data-i18n="search"></button>
+      </form>
+      <section class="card" id="summaryCard">
+        <h2 data-i18n="resultTitle"></h2>
+        <div id="summary"></div>
+      </section>
+      <section class="card routes-card">
+        <h2 id="routesTitle"></h2>
+        <ul id="routesList" class="routes-list"></ul>
+      </section>
+    </aside>
+    <section class="center">
+      <div class="date-strip-wrap">
+        <span class="date-label" data-i18n="date"></span>
+        <div id="dateStrip" class="date-strip"></div>
+      </div>
+      <div class="map-wrap">
+        <div id="map"></div>
+        <div id="legend" class="legend"></div>
+      </div>
+    </section>
+    <aside class="panel panel-right">
+      <section class="card">
+        <h2 data-i18n="flightDetails"></h2>
+        <div id="details"></div>
+      </section>
+      <section class="card sim-card">
+        <h2 data-i18n="simTitle"></h2>
+        <div class="sim-controls">
+          <button type="button" id="playBtn" class="primary-btn small">▶ <span data-i18n="play"></span></button>
+          <button type="button" id="stepBtn" class="ghost-btn small">⏭ <span data-i18n="step"></span></button>
+          <button type="button" id="resetBtn" class="ghost-btn small">⟲ <span data-i18n="reset"></span></button>
+        </div>
+        <div class="sim-speed">
+          <span data-i18n="speed"></span>
+          <input type="range" id="speedRange" min="1" max="10" value="4">
+          <span id="stepCounter" class="muted"></span>
+        </div>
+        <table class="dist-table">
+          <thead>
+            <tr>
+              <th data-i18n="vertex"></th>
+              <th data-i18n="dist"></th>
+              <th data-i18n="prev"></th>
+              <th data-i18n="visited"></th>
+            </tr>
+          </thead>
+          <tbody id="distTableBody"></tbody>
+        </table>
+        <h3 data-i18n="log"></h3>
+        <ol id="simLog" class="sim-log"></ol>
+      </section>
+    </aside>
+  </main>
+  <script src="data/scripts/lib/leaflet.js"></script>
+  <script src="data/scripts/user/data.js"></script>
+  <script src="data/language/i18n.js"></script>
+  <script src="data/scripts/user/graph.js"></script>
+  <script src="data/scripts/user/dijkstra.js"></script>
+  <script src="data/scripts/user/paths.js"></script>
+  <script src="data/scripts/user/map.js"></script>
+  <script src="data/scripts/user/simulation.js"></script>
+  <script src="data/scripts/user/app.js"></script>
+</body>
+</html>
