@@ -30,7 +30,7 @@ function applyIncidents(flight, incidents) {
   let f = flight;
   for (const inc of incidents) {
     if (inc.type === 'close' && (f.from === inc.code || f.to === inc.code)) return null;
-    const onLeg = f.from === inc.from && f.to === inc.to;
+    const onLeg = f.from === inc.from && f.to === inc.to && (!inc.flightId || inc.flightId === f.id);
     if (!onLeg) continue;
     if (inc.type === 'cancel') return null;
     if (inc.type === 'delay') {

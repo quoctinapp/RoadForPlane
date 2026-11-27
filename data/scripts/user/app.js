@@ -11,16 +11,25 @@ const App = {
     roundTrip: false,
     dates: [toDateString(DATA_YEAR, DATA_MONTH, 1)],
     mode: 'price',
-    incidents: []
+    incidents: [],
+    fareClass: 'economy',
+    slots: [],
+    passengers: { adult: 1, child: 0, infant: 0 },
+    tier: 'standard',
+    promotions: [],
+    pricing: DEFAULT_PRICING
   },
   segments: [],
   active: 0,
 
   init() {
+    this.applyTheme(localStorage.getItem('theme') || 'dark');
     MapView.init('map');
+    MapView.setTheme(this.theme);
     MapView.onAirportClick = (code) => this.openAirportPopup(code);
     applyLanguage();
     this.fillSelects();
+    this.fillTripOptions();
     this.renderStops();
     this.bindEvents();
     this.updateToggles();
@@ -41,6 +50,38 @@ const App = {
     document.getElementById('fromSelect').value = this.state.from;
     document.getElementById('toSelect').value = this.state.to;
     document.getElementById('roundTripChk').checked = this.state.roundTrip;
+  },
+
+  applyTheme(theme) {
+    this.theme = theme;
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem('theme', theme);
+    document.getElementById('themeBtn').textContent = theme === 'dark' ? '☀' : '🌙';
+  },
+
+  fillTripOptions() {
+    const select = document.getElementById('fareClassSelect');
+    select.innerHTML = FARE_CLASSES.map(fc => '<option value="' + fc + '">' + t('fc_' + fc) + '</option>').join('');
+    select.value = this.state.fareClass;
+    document.querySelectorAll('#slotChips .chip').forEach(chip => {
+      const slot = chip.dataset.slot;
+      chip.innerHTML = t('slot_' + slot) + '<small>' + t('slotHint_' + slot) + '</small>';
+      chip.classList.toggle('active', this.state.slots.includes(slot));
+    });
+  },
+
+  readPassengers() {
+    const value = (id) => Math.max(0, Math.floor(Number(document.getElementById(id).value) || 0));
+    const passengers = { adult: value('paxAdult'), child: value('paxChild'), infant: value('paxInfant') };
+    const ok = validPassengers(passengers);
+    document.getElementById('paxError').hidden = ok;
+    if (ok) this.state.passengers = passengers;
+    return ok;
+  },
+
+  flightsFor(date) {
+    const { fareClass, slots, promotions, pricing } = this.state;
+    return prepareFlights(flightsOn(date), { fareClass, slots, promotions, pricing });
   },
 
   renderStops() {
@@ -90,6 +131,32 @@ const App = {
       this.renderStops();
     });
 
+    document.getElementById('themeBtn').addEventListener('click', () => {
+      this.applyTheme(this.theme === 'dark' ? 'light' : 'dark');
+      MapView.setTheme(this.theme);
+    });
+
+    document.getElementById('fareClassSelect').addEventListener('change', (e) => {
+      this.state.fareClass = e.target.value;
+      this.refresh();
+    });
+
+    document.querySelectorAll('#slotChips .chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const slot = chip.dataset.slot;
+        const slots = this.state.slots;
+        this.state.slots = slots.includes(slot) ? slots.filter(s => s !== slot) : slots.concat(slot);
+        this.fillTripOptions();
+        this.refresh();
+      });
+    });
+
+    ['paxAdult', 'paxChild', 'paxInfant'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        if (this.readPassengers()) this.renderSummary();
+      });
+    });
+
     document.querySelectorAll('#modeToggle button').forEach(btn => {
       btn.addEventListener('click', () => {
         this.state.mode = btn.dataset.mode;
@@ -110,6 +177,7 @@ const App = {
     document.addEventListener('languagechange', () => {
       this.updateToggles();
       this.fillSelects();
+      this.fillTripOptions();
       this.renderStops();
       MapView.updateLanguage();
       this.render(true);
@@ -186,7 +254,7 @@ const App = {
 
   solve(seg) {
     const { mode, incidents } = this.state;
-    Object.assign(seg, solveSegment(this.codes, flightsOn(seg.date), seg, mode, incidents, MAX_LEGS));
+    Object.assign(seg, solveSegment(this.codes, this.flightsFor(seg.date), seg, mode, incidents, MAX_LEGS));
     seg.reroute = null;
     if (seg.rerouteSpec) {
       const spec = seg.rerouteSpec;
@@ -282,7 +350,7 @@ const App = {
       const date = toDateString(DATA_YEAR, DATA_MONTH, day);
       let total = Infinity;
       if (seg.from !== seg.to) {
-        const graph = buildGraph(this.codes, flightsOn(date), date, mode, incidents);
+        const graph = buildGraph(this.codes, this.flightsFor(date), date, mode, incidents);
         total = dijkstra(graph, seg.from, seg.to).total;
       }
       values.push({ day: day, date: date, total: total });
@@ -344,16 +412,41 @@ const App = {
     const main = mode === 'time' ? formatDuration(totalTime) : formatMoney(totalPrice);
 
     box.innerHTML =
-      '<span class="tag">' + t(mode === 'time' ? 'fastest' : 'cheapest') + ' · Dijkstra</span>' +
+      '<span class="tag">' + t(mode === 'time' ? 'fastest' : 'cheapest') + ' · Dijkstra</span> ' +
+      '<span class="tag">' + t('fc_' + this.state.fareClass) + '</span>' +
       '<div class="summary-total">' + (complete ? main : '—') + '</div>' +
-      '<div class="summary-row"><span>' + t('tripTotal') + '</span><b>' + formatMoney(totalPrice) + '</b></div>' +
+      '<div class="summary-row"><span>' + t('fareNote', { fc: t('fc_' + this.state.fareClass) }) + '</span><b>' + formatMoney(totalPrice) + '</b></div>' +
       '<div class="summary-row"><span>' + t('totalTime') + '</span><b>' + formatDuration(totalTime) + '</b></div>' +
       (ordered ? '' : '<p class="message warn">' + t('dateOrderWarn') + '</p>') +
-      '<ol class="trip-list">' + rows + '</ol>';
+      '<ol class="trip-list">' + rows + '</ol>' +
+      (complete ? this.quoteHtml() : '');
 
     box.querySelectorAll('.trip-seg').forEach(li => {
       li.addEventListener('click', () => this.setActive(Number(li.dataset.seg)));
     });
+  },
+
+  currentQuote() {
+    const routes = this.segments.map(seg => this.selectedRoute(seg));
+    if (routes.some(r => !r)) return null;
+    return quote(routes, this.state.passengers, this.state.tier, this.state.pricing);
+  },
+
+  quoteHtml() {
+    const q = this.currentQuote();
+    if (!q) return '';
+    let html = '<div class="quote"><h3>' + t('priceBreakdown') + '</h3>';
+    for (const line of q.lines) {
+      html += '<div class="summary-row"><span>' + t('pax_' + line.type) + ' × ' + line.count + '</span><b>' + formatMoney(line.amount) + '</b></div>';
+    }
+    if (q.promoSaving > 0) {
+      html += '<div class="summary-row promo"><span>' + t('promoSaving') + '</span><b>−' + formatMoney(q.promoSaving) + '</b></div>';
+    }
+    if (q.tierDiscount > 0) {
+      html += '<div class="summary-row promo"><span>' + t('memberDiscount', { tier: t('tier_' + q.tier), p: q.tierPercent }) + '</span><b>−' + formatMoney(q.tierDiscount) + '</b></div>';
+    }
+    html += '<div class="summary-row grand"><span>' + t('grandTotal') + '</span><b>' + formatMoney(q.total) + '</b></div></div>';
+    return html;
   },
 
   setActive(index) {
@@ -434,9 +527,11 @@ const App = {
           '<div class="leg-foot">' +
             '<span>' +
               (leg.delayed ? '<span class="tag tag-warn">' + t('delayedTag') + '</span> ' : '') +
-              (leg.surged ? '<span class="tag tag-warn">' + t('surgedTag') + '</span>' : '') +
+              (leg.surged ? '<span class="tag tag-warn">' + t('surgedTag') + '</span> ' : '') +
+              (leg.promo ? '<span class="tag tag-promo">' + t('promoTag', { p: leg.promo.percent }) + '</span> ' : '') +
+              '<span class="tag">' + t('fc_' + (leg.fareClass || 'economy')) + '</span>' +
             '</span>' +
-            '<span class="leg-price">' + formatMoney(leg.price) + '</span>' +
+            '<span class="leg-price">' + (leg.promo ? '<s>' + formatMoney(leg.listPrice) + '</s> ' : '') + formatMoney(leg.price) + '</span>' +
           '</div>' +
           '<div class="leg-actions">' +
             '<button type="button" class="incident-toggle">' + t('incidentBtn') + '</button>' +

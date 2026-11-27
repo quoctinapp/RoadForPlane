@@ -17,9 +17,12 @@
         <p data-i18n="appSubtitle"></p>
       </div>
     </div>
-    <div class="lang-toggle" role="group">
-      <button type="button" data-lang="vi">VI</button>
-      <button type="button" data-lang="en">EN</button>
+    <div class="header-actions">
+      <button type="button" id="themeBtn" class="icon-btn" data-i18n-title="themeToggle"></button>
+      <div class="lang-toggle" role="group">
+        <button type="button" data-lang="vi">VI</button>
+        <button type="button" data-lang="en">EN</button>
+      </div>
     </div>
   </header>
   <main class="layout">
@@ -43,6 +46,27 @@
           <input type="checkbox" id="roundTripChk">
           <span data-i18n="roundTrip"></span>
         </label>
+        <label class="field">
+          <span data-i18n="fareClassLabel"></span>
+          <select id="fareClassSelect"></select>
+        </label>
+        <div class="field">
+          <span data-i18n="slotsLabel"></span>
+          <div class="chips" id="slotChips">
+            <button type="button" class="chip" data-slot="morning"></button>
+            <button type="button" class="chip" data-slot="afternoon"></button>
+            <button type="button" class="chip" data-slot="evening"></button>
+          </div>
+        </div>
+        <div class="field">
+          <span data-i18n="passengersLabel"></span>
+          <div class="pax-grid">
+            <label><small data-i18n="pax_adult"></small><input type="number" id="paxAdult" min="1" max="9" value="1"></label>
+            <label><small data-i18n="pax_child"></small><input type="number" id="paxChild" min="0" max="8" value="0"></label>
+            <label><small data-i18n="pax_infant"></small><input type="number" id="paxInfant" min="0" max="9" value="0"></label>
+          </div>
+          <small id="paxError" class="warn" hidden data-i18n="paxInvalid"></small>
+        </div>
         <div class="field">
           <span data-i18n="criterion"></span>
           <div class="segmented" id="modeToggle">
@@ -121,10 +145,13 @@
   </main>
   <script src="data/scripts/lib/leaflet.js"></script>
   <script src="data/scripts/user/data.js"></script>
+  <script src="data/language/vi.js"></script>
+  <script src="data/language/en.js"></script>
   <script src="data/language/i18n.js"></script>
   <script src="data/scripts/user/graph.js"></script>
   <script src="data/scripts/user/dijkstra.js"></script>
   <script src="data/scripts/user/paths.js"></script>
+  <script src="data/scripts/user/pricing.js"></script>
   <script src="data/scripts/user/trip.js"></script>
   <script src="data/scripts/user/map.js"></script>
   <script src="data/scripts/user/simulation.js"></script>

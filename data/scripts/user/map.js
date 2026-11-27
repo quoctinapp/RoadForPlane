@@ -34,6 +34,9 @@ const MapView = {
       }),
       dark: L.tileLayer(esri + 'Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
         attribution: 'Tiles &copy; Esri', maxZoom: 10, minZoom: 5
+      }),
+      light: L.tileLayer(esri + 'Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri', maxZoom: 10, minZoom: 5
       })
     };
     this.baseLayers.satellite.addTo(this.map);
@@ -58,6 +61,15 @@ const MapView = {
     this.map.on('zoomend', () => this.updateZoomClass());
     this.map.fitBounds(this.allBounds(), { padding: [30, 30] });
     this.updateZoomClass();
+  },
+
+  setTheme(theme) {
+    const wanted = theme === 'light' ? this.baseLayers.light : this.baseLayers.satellite;
+    for (const key in this.baseLayers) {
+      const layer = this.baseLayers[key];
+      if (layer !== wanted && this.map.hasLayer(layer)) this.map.removeLayer(layer);
+    }
+    if (!this.map.hasLayer(wanted)) wanted.addTo(this.map);
   },
 
   allBounds() {
@@ -95,6 +107,7 @@ const MapView = {
     const layers = {};
     layers[t('layerSatellite')] = this.baseLayers.satellite;
     layers[t('layerDark')] = this.baseLayers.dark;
+    layers[t('layerLight')] = this.baseLayers.light;
     this.layerControl = L.control.layers(layers, null, { position: 'topright' }).addTo(this.map);
 
     if (this.seaLayer) this.seaLayer.remove();

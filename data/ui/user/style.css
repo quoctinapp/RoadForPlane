@@ -1205,3 +1205,180 @@ select {
     overflow: visible;
   }
 }
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  font-size: 16px;
+}
+
+.icon-btn:hover {
+  border-color: var(--accent);
+}
+
+.chips {
+  display: flex;
+  gap: 6px;
+}
+
+.chip {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  padding: 6px 4px;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.chip small {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.chip.active {
+  border-color: var(--accent);
+  background: rgba(59, 130, 246, .18);
+  color: var(--accent-2);
+}
+
+.pax-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.pax-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pax-grid small {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.pax-grid input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 8px;
+}
+
+.quote {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.quote h3 {
+  margin: 0 0 6px;
+}
+
+.summary-row.promo b {
+  color: var(--end);
+}
+
+.summary-row.grand {
+  padding-top: 6px;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.summary-row.grand b {
+  font-size: 17px;
+  color: var(--optimal);
+}
+
+.tag-promo {
+  background: rgba(34, 197, 94, .15);
+  color: #22c55e;
+}
+
+.leg-price s {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f1f5f9;
+  --panel: #ffffff;
+  --card: #f8fafc;
+  --border: #d5deea;
+  --text: #0f172a;
+  --muted: #5b6b82;
+  --accent-2: #2563eb;
+  --optimal: #0284c7;
+}
+
+[data-theme="light"] #map {
+  background: #e5e9f0;
+}
+
+[data-theme="light"] .legend,
+[data-theme="light"] .leaflet-tooltip.arc-tip {
+  background: rgba(255, 255, 255, .96);
+  color: var(--text);
+}
+
+[data-theme="light"] .city-marker .label,
+[data-theme="light"] .city-marker .label .code {
+  color: #0f172a;
+  text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff;
+}
+
+[data-theme="light"] .city-marker .badge {
+  background: rgba(255, 255, 255, .95);
+  color: #0f172a;
+}
+
+[data-theme="light"] .sea-label span {
+  color: #1d4ed8;
+  text-shadow: 0 0 3px #fff;
+}
+
+[data-theme="light"] .path-dash {
+  stroke: #0369a1;
+}
+
+[data-theme="light"] .plane-icon path {
+  fill: #0f172a;
+}
+
+[data-theme="light"] .warn,
+[data-theme="light"] .message.warn,
+[data-theme="light"] .tag-warn {
+  color: #b45309;
+}
+
+[data-theme="light"] .incidents-list li,
+[data-theme="light"] .incident-toggle,
+[data-theme="light"] .popup-btn {
+  color: #b91c1c;
+}
+
+[data-theme="light"] .city-marker.current .badge,
+[data-theme="light"] .sim-log li.log-select {
+  color: #a16207;
+}
+
+[data-theme="light"] .sim-log li.log-update {
+  color: #0e7490;
+}
+
+[data-theme="light"] .tag-promo {
+  color: #15803d;
+}
