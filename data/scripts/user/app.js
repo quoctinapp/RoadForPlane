@@ -489,6 +489,8 @@ const App = {
     box.querySelectorAll('.trip-seg').forEach(li => {
       li.addEventListener('click', () => this.setActive(Number(li.dataset.seg)));
     });
+    const bookBtn = document.getElementById('bookBtn');
+    if (bookBtn) bookBtn.addEventListener('click', () => Booking.openBook());
   },
 
   currentQuote() {
@@ -510,8 +512,34 @@ const App = {
     if (q.tierDiscount > 0) {
       html += '<div class="summary-row promo"><span>' + t('memberDiscount', { tier: t('tier_' + q.tier), p: q.tierPercent }) + '</span><b>−' + formatMoney(q.tierDiscount) + '</b></div>';
     }
-    html += '<div class="summary-row grand"><span>' + t('grandTotal') + '</span><b>' + formatMoney(q.total) + '</b></div></div>';
+    html += '<div class="summary-row grand"><span>' + t('grandTotal') + '</span><b>' + formatMoney(q.total) + '</b></div>';
+    html += '<button type="button" id="bookBtn" class="primary-btn book-btn">' + t('book') + '</button></div>';
     return html;
+  },
+
+  legRecord(leg) {
+    return {
+      id: leg.id, airline: leg.airline, airlineCode: leg.airlineCode, from: leg.from, to: leg.to, date: leg.date,
+      depart: leg.depart, arrive: leg.arrive, nextDay: !!leg.nextDay, duration: leg.duration,
+      price: leg.price, listPrice: leg.listPrice || leg.price, fareClass: leg.fareClass || this.state.fareClass,
+      promo: leg.promo ? { name: leg.promo.name || '', percent: leg.promo.percent } : null
+    };
+  },
+
+  bookingDraft() {
+    const q = this.currentQuote();
+    if (!q) return null;
+    return {
+      fareClass: this.state.fareClass,
+      passengers: { ...this.state.passengers },
+      tier: this.state.tier,
+      segments: this.segments.map(seg => ({
+        from: seg.from, to: seg.to, date: seg.date, kind: seg.kind,
+        legs: this.selectedRoute(seg).legs.map(leg => this.legRecord(leg))
+      })),
+      quote: { lines: q.lines, subtotal: q.subtotal, tierPercent: q.tierPercent, tierDiscount: q.tierDiscount, promoSaving: q.promoSaving, total: q.total },
+      total: q.total
+    };
   },
 
   setActive(index) {
@@ -745,5 +773,6 @@ const App = {
 
 App.init();
 Account.init();
+Booking.init();
 Admin.init();
 Store.init();

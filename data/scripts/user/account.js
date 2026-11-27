@@ -14,6 +14,14 @@ const Account = {
         document.getElementById(btn.dataset.closeModal).hidden = true;
       });
     });
+    document.querySelectorAll('.modal').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.hidden = true;
+      });
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') document.querySelectorAll('.modal').forEach(modal => { modal.hidden = true; });
+    });
     document.addEventListener('storechange', (e) => {
       if (e.detail.kind === 'auth') this.render();
     });
@@ -108,7 +116,7 @@ const Account = {
     area.appendChild(chip);
 
     const buttons = [];
-    if (typeof Booking !== 'undefined') buttons.push({ id: 'myTicketsBtn', key: 'myTickets', run: () => Booking.openMyTickets() });
+    if (typeof Booking !== 'undefined') buttons.push({ id: 'myTicketsBtn', key: 'myTickets', count: Booking.affectedCount(), run: () => Booking.openMyTickets() });
     if (Store.isAdmin()) buttons.push({ id: 'adminBtn', key: 'adminPage', run: () => { location.hash = '#admin'; } });
     buttons.push({ id: 'logoutBtn', key: 'logout', run: () => Store.signOut() });
 
@@ -117,7 +125,8 @@ const Account = {
       btn.type = 'button';
       btn.className = 'ghost-btn small';
       btn.id = b.id;
-      btn.textContent = t(b.key);
+      btn.textContent = t(b.key) + (b.count ? ' (' + b.count + ')' : '');
+      if (b.count) btn.classList.add('alert');
       btn.addEventListener('click', b.run);
       area.appendChild(btn);
     }

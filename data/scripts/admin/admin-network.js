@@ -276,7 +276,8 @@ const AdminIncidents = {
   async create() {
     const incident = this.build();
     if (!incident) return Admin.notify(t('required'));
-    await Admin.run(Store.addIncident(incident));
+    const ref = await Admin.run(Store.addIncident(incident));
+    incident.id = ref.id;
     let affected = 0;
     if (typeof AdminBookings !== 'undefined') affected = await AdminBookings.applyIncident(incident);
     Admin.notify(t('incCreated', { n: affected }));

@@ -173,6 +173,21 @@
       </form>
     </div>
   </div>
+  <div id="bookModal" class="modal" hidden>
+    <div class="modal-box wide">
+      <button type="button" class="modal-close" data-close-modal="bookModal" data-i18n-title="close">✕</button>
+      <h2 data-i18n="bookTitle"></h2>
+      <div id="bookBody"></div>
+      <button type="button" id="bookConfirmBtn" class="primary-btn book-btn" data-i18n="bookConfirm"></button>
+    </div>
+  </div>
+  <div id="ticketsModal" class="modal" hidden>
+    <div class="modal-box wide">
+      <button type="button" class="modal-close" data-close-modal="ticketsModal" data-i18n-title="close">✕</button>
+      <h2 data-i18n="myTickets"></h2>
+      <div id="ticketsList" class="tickets-list"></div>
+    </div>
+  </div>
   <div id="toast" class="toast" hidden></div>
   <script src="data/scripts/lib/leaflet.js"></script>
   <script src="data/scripts/lib/firebase/firebase-app-compat.js"></script>
@@ -192,9 +207,11 @@
   <script src="data/scripts/user/map.js"></script>
   <script src="data/scripts/user/simulation.js"></script>
   <script src="data/scripts/user/account.js"></script>
+  <script src="data/scripts/user/booking.js"></script>
   <script src="data/scripts/admin/admin.js"></script>
   <script src="data/scripts/admin/admin-network.js"></script>
   <script src="data/scripts/admin/admin-business.js"></script>
+  <script src="data/scripts/admin/admin-bookings.js"></script>
   <script src="data/scripts/user/app.js"></script>
 </body>
 </html>

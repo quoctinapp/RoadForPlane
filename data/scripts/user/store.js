@@ -161,6 +161,28 @@ const Store = {
     return this.db.collection(collection).doc(id).delete();
   },
 
+  plain(value) {
+    return JSON.parse(JSON.stringify(value));
+  },
+
+  createBooking(booking) {
+    const ref = this.db.collection('bookings').doc();
+    const code = ref.id.slice(0, 6).toUpperCase();
+    return ref.set(this.plain({ ...booking, code: code, uid: this.user.uid, status: 'confirmed', createdAt: this.now(), updatedAt: this.now() }))
+      .then(() => code);
+  },
+
+  updateBooking(id, fields) {
+    return this.db.collection('bookings').doc(id).update(this.plain({ ...fields, updatedAt: this.now() }));
+  },
+
+  watchMyBookings(callback) {
+    return this.db.collection('bookings').where('uid', '==', this.user.uid).onSnapshot(
+      snap => callback(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))),
+      err => this.fail(err)
+    );
+  },
+
   async seedDefaults() {
     const batch = this.db.batch();
     for (const a of DEFAULT_AIRPORTS) {
