@@ -110,7 +110,7 @@ const App = {
       this.state.from = document.getElementById('fromSelect').value;
       this.state.to = document.getElementById('toSelect').value;
       this.state.roundTrip = document.getElementById('roundTripChk').checked;
-      this.state.incidents = [];
+      if (!Store.online) this.state.incidents = [];
       this.active = 0;
       this.search();
     });
@@ -118,7 +118,7 @@ const App = {
     document.getElementById('swapBtn').addEventListener('click', () => {
       [this.state.from, this.state.to] = [this.state.to, this.state.from];
       this.state.stops.reverse();
-      this.state.incidents = [];
+      if (!Store.online) this.state.incidents = [];
       this.fillSelects();
       this.renderStops();
       this.search();
@@ -197,14 +197,79 @@ const App = {
     });
 
     document.getElementById('clearIncidentsBtn').addEventListener('click', () => {
+      if (Store.online) {
+        Promise.all(this.state.incidents.map(inc => Store.removeIncident(inc.id))).catch(err => this.toast(err.message));
+        return;
+      }
       this.state.incidents = [];
       this.segments.forEach(seg => { seg.rerouteSpec = null; });
       this.refresh();
     });
 
+    document.addEventListener('storechange', (e) => this.onStoreChange(e.detail.kind));
+
     document.getElementById('playBtn').addEventListener('click', () => Simulator.togglePlay());
     document.getElementById('stepBtn').addEventListener('click', () => Simulator.stepOnce());
     document.getElementById('resetBtn').addEventListener('click', () => Simulator.reset());
+  },
+
+  canManageIncidents() {
+    return !Store.online || Store.isAdmin();
+  },
+
+  toast(message) {
+    const box = document.getElementById('toast');
+    box.textContent = message;
+    box.hidden = false;
+    clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => { box.hidden = true; }, 5000);
+  },
+
+  onStoreChange(kind) {
+    if (kind === 'network') {
+      this.codes = CITIES.map(c => c.code);
+      MapView.rebuildCities();
+      const valid = (code) => this.codes.includes(code);
+      if (!valid(this.state.from)) this.state.from = this.codes[0];
+      if (!valid(this.state.to)) this.state.to = this.codes.find(c => c !== this.state.from);
+      this.state.stops = this.state.stops.filter(valid);
+      this.fillSelects();
+      this.renderStops();
+      this.search();
+    } else if (kind === 'incidents') {
+      this.syncIncidents(Store.incidents);
+    } else if (kind === 'promotions') {
+      this.state.promotions = Store.promotions;
+      this.refresh();
+    } else if (kind === 'pricing') {
+      this.state.pricing = Store.pricing;
+      this.refresh();
+    } else if (kind === 'auth') {
+      this.state.tier = Store.tier();
+      this.render(true);
+    }
+  },
+
+  syncIncidents(list) {
+    const ids = new Set(list.map(inc => inc.id));
+    const known = new Set(this.state.incidents.map(inc => inc.id));
+    let affected = 0;
+    for (const seg of this.segments) {
+      if (seg.rerouteSpec && !ids.has(seg.rerouteSpec.incident.id)) seg.rerouteSpec = null;
+      const route = this.selectedRoute(seg);
+      if (!route) continue;
+      for (const inc of list) {
+        if (known.has(inc.id) || inc.date !== seg.date) continue;
+        const legIndex = affectedLegIndex(route, inc);
+        if (legIndex < 0) continue;
+        seg.rerouteSpec = { baseRoute: route, legIndex: legIndex, incident: inc };
+        affected++;
+        break;
+      }
+    }
+    this.state.incidents = list;
+    if (this.segments.length) this.refresh();
+    if (affected) this.toast(t('incidentAffects'));
   },
 
   setShowAll(show) {
@@ -533,15 +598,16 @@ const App = {
             '</span>' +
             '<span class="leg-price">' + (leg.promo ? '<s>' + formatMoney(leg.listPrice) + '</s> ' : '') + formatMoney(leg.price) + '</span>' +
           '</div>' +
-          '<div class="leg-actions">' +
+          (this.canManageIncidents() ? '<div class="leg-actions">' +
             '<button type="button" class="incident-toggle">' + t('incidentBtn') + '</button>' +
             '<div class="incident-menu" hidden>' +
               '<button type="button" data-inc="cancel" data-leg="' + i + '">' + t('incCancel') + '</button>' +
               '<button type="button" data-inc="delay" data-leg="' + i + '">' + t('incDelay') + '</button>' +
               '<button type="button" data-inc="surge" data-leg="' + i + '">' + t('incSurge') + '</button>' +
               (canClose ? '<button type="button" data-inc="close" data-leg="' + i + '">' + t('incClose', { code: leg.to }) + '</button>' : '') +
+              '<button type="button" data-inc="cancelFlight" data-leg="' + i + '">' + t('incCancelFlight', { id: leg.id }) + '</button>' +
             '</div>' +
-          '</div>' +
+          '</div>' : '') +
         '</div>';
     });
     html += '<div class="details-total"><span>' + t('totalPrice') + '</span><span>' + formatMoney(route.totalPrice) + '</span></div>';
@@ -549,11 +615,17 @@ const App = {
   },
 
   sameIncident(a, b) {
-    return a.type === b.type && a.date === b.date && a.code === b.code && a.from === b.from && a.to === b.to;
+    return a.type === b.type && a.date === b.date && a.code === b.code && a.from === b.from && a.to === b.to &&
+      (a.flightId || null) === (b.flightId || null);
   },
 
   addIncident(incident, spec) {
     if (this.state.incidents.some(inc => this.sameIncident(inc, incident))) return;
+    if (Store.online) {
+      Store.addIncident(incident).catch(err => this.toast(err.message));
+      return;
+    }
+    incident.id = 'local-' + Date.now();
     this.state.incidents.push(incident);
     if (spec) this.activeSegment().rerouteSpec = spec;
     this.setShowAll(false);
@@ -564,14 +636,19 @@ const App = {
     const seg = this.activeSegment();
     const route = this.selectedRoute(seg);
     const leg = route.legs[legIndex];
-    const incident = type === 'close'
-      ? { type: type, code: leg.to, date: seg.date }
-      : { type: type, from: leg.from, to: leg.to, date: seg.date };
+    let incident;
+    if (type === 'close') incident = { type: 'close', code: leg.to, date: seg.date };
+    else if (type === 'cancelFlight') incident = { type: 'cancel', from: leg.from, to: leg.to, flightId: leg.id, date: seg.date };
+    else incident = { type: type, from: leg.from, to: leg.to, date: seg.date };
     this.addIncident(incident, { baseRoute: route, legIndex: legIndex, incident: incident });
   },
 
   removeIncident(index) {
     const incident = this.state.incidents[index];
+    if (Store.online) {
+      Store.removeIncident(incident.id).catch(err => this.toast(err.message));
+      return;
+    }
     this.state.incidents.splice(index, 1);
     for (const seg of this.segments) {
       if (seg.rerouteSpec && seg.rerouteSpec.incident === incident) seg.rerouteSpec = null;
@@ -581,19 +658,22 @@ const App = {
 
   incidentText(inc) {
     const params = { from: inc.from, to: inc.to, code: inc.code, date: this.shortDate(inc.date) };
+    if (inc.type === 'cancel' && inc.flightId) return t('descCancelFlight', { ...params, id: inc.flightId });
     const key = { cancel: 'descCancel', delay: 'descDelay', surge: 'descSurge', close: 'descClose' }[inc.type];
-    return t(key, params);
+    return t(key, params) + (inc.note ? ' – ' + inc.note : '');
   },
 
   renderIncidents() {
     const card = document.getElementById('incidentsCard');
     const list = document.getElementById('incidentsList');
+    const manage = this.canManageIncidents();
     card.hidden = this.state.incidents.length === 0;
+    document.getElementById('clearIncidentsBtn').hidden = !manage;
     list.innerHTML = '';
     this.state.incidents.forEach((inc, i) => {
       const li = document.createElement('li');
-      li.innerHTML = '<span>⚠ ' + this.incidentText(inc) + '</span><button type="button" title="✕">✕</button>';
-      li.querySelector('button').addEventListener('click', () => this.removeIncident(i));
+      li.innerHTML = '<span>⚠ ' + this.incidentText(inc) + '</span>' + (manage ? '<button type="button" title="✕">✕</button>' : '');
+      if (manage) li.querySelector('button').addEventListener('click', () => this.removeIncident(i));
       list.appendChild(li);
     });
   },
@@ -640,7 +720,7 @@ const App = {
 
     const box = document.createElement('div');
     box.innerHTML = '<b>' + city.name[currentLang] + ' (' + code + ')</b><br><small>' + city.airport + '</small>';
-    if (!fixed.includes(code)) {
+    if (!fixed.includes(code) && this.canManageIncidents()) {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'popup-btn';
@@ -664,3 +744,5 @@ const App = {
 };
 
 App.init();
+Account.init();
+Store.init();

@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function changes() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    match /airports/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /routes/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /incidents/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /promotions/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /settings/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /users/{uid} {
+      allow read: if (signedIn() && request.auth.uid == uid) || isAdmin();
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.role == 'customer'
+        && request.resource.data.tier == 'standard';
+      allow update: if isAdmin()
+        || (signedIn() && request.auth.uid == uid && !changes().hasAny(['role', 'tier', 'email']));
+      allow delete: if isAdmin();
+    }
+
+    match /bookings/{id} {
+      allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.status == 'confirmed';
+      allow update: if isAdmin()
+        || (signedIn() && resource.data.uid == request.auth.uid && (
+          (resource.data.status == 'affected'
+            && request.resource.data.status == 'changed'
+            && changes().hasOnly(['status', 'segments', 'total', 'history', 'updatedAt'])
+            && request.resource.data.segments == resource.data.suggestion.segments
+            && request.resource.data.total == resource.data.suggestion.total)
+          || (resource.data.status in ['confirmed', 'changed', 'affected']
+            && request.resource.data.status == 'refund_requested'
+            && changes().hasOnly(['status', 'refund', 'history', 'updatedAt']))
+        ));
+      allow delete: if isAdmin();
+    }
+  }
+}

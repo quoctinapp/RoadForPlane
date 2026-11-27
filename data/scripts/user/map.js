@@ -134,8 +134,15 @@ const MapView = {
     this.updateCityLabels();
   },
 
+  rebuildCities() {
+    for (const code in this.markers) this.markers[code].remove();
+    this.markers = {};
+    this.drawCities();
+  },
+
   markerEl(code) {
-    const el = this.markers[code].getElement();
+    const marker = this.markers[code];
+    const el = marker ? marker.getElement() : null;
     return el ? el.querySelector('.city-marker') : null;
   },
 

@@ -18,6 +18,7 @@
       </div>
     </div>
     <div class="header-actions">
+      <div id="accountArea" class="account-area"></div>
       <button type="button" id="themeBtn" class="icon-btn" data-i18n-title="themeToggle"></button>
       <div class="lang-toggle" role="group">
         <button type="button" data-lang="vi">VI</button>
@@ -143,7 +144,29 @@
       </section>
     </aside>
   </main>
+  <div id="authModal" class="modal" hidden>
+    <div class="modal-box">
+      <button type="button" class="modal-close" data-close-modal="authModal" data-i18n-title="close">✕</button>
+      <div class="segmented" id="authTabs">
+        <button type="button" data-tab="login" data-i18n="login"></button>
+        <button type="button" data-tab="register" data-i18n="register"></button>
+      </div>
+      <form id="authForm" class="modal-form">
+        <label class="field reg-only"><span data-i18n="fullName"></span><input id="authName" autocomplete="name"></label>
+        <label class="field"><span>Email</span><input id="authEmail" type="email" required autocomplete="email"></label>
+        <label class="field"><span data-i18n="password"></span><input id="authPassword" type="password" required minlength="6" autocomplete="current-password"></label>
+        <label class="field reg-only"><span data-i18n="phone"></span><input id="authPhone" autocomplete="tel"></label>
+        <p id="authError" class="message warn" hidden></p>
+        <button type="submit" id="authSubmit" class="primary-btn"></button>
+      </form>
+    </div>
+  </div>
+  <div id="toast" class="toast" hidden></div>
   <script src="data/scripts/lib/leaflet.js"></script>
+  <script src="data/scripts/lib/firebase/firebase-app-compat.js"></script>
+  <script src="data/scripts/lib/firebase/firebase-auth-compat.js"></script>
+  <script src="data/scripts/lib/firebase/firebase-firestore-compat.js"></script>
+  <script src="data/scripts/user/firebase-config.js"></script>
   <script src="data/scripts/user/data.js"></script>
   <script src="data/language/vi.js"></script>
   <script src="data/language/en.js"></script>
@@ -153,8 +176,10 @@
   <script src="data/scripts/user/paths.js"></script>
   <script src="data/scripts/user/pricing.js"></script>
   <script src="data/scripts/user/trip.js"></script>
+  <script src="data/scripts/user/store.js"></script>
   <script src="data/scripts/user/map.js"></script>
   <script src="data/scripts/user/simulation.js"></script>
+  <script src="data/scripts/user/account.js"></script>
   <script src="data/scripts/user/app.js"></script>
 </body>
 </html>

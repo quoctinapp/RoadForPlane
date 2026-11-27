@@ -177,9 +177,20 @@ function defaultRouteDefs() {
 }
 
 function rebuildNetwork(airports, routeDefs) {
-  const active = airports.filter(a => a.active !== false);
+  const valid = (a) => a.active !== false && typeof a.code === 'string' && a.code.length > 0 &&
+    Number.isFinite(Number(a.lat)) && Number.isFinite(Number(a.lng));
   CITIES.length = 0;
-  for (const airport of active) CITIES.push({ label: 'right', ...airport });
+  for (const airport of airports.filter(valid)) {
+    CITIES.push({
+      label: 'right',
+      airport: airport.code,
+      province: '',
+      ...airport,
+      name: airport.name && airport.name.vi ? airport.name : { vi: airport.code, en: airport.code },
+      lat: Number(airport.lat),
+      lng: Number(airport.lng)
+    });
+  }
 
   const codes = new Set(CITIES.map(c => c.code));
   ROUTES = buildRoutes(routeDefs.filter(r => r.active !== false && codes.has(r.a) && codes.has(r.b) && r.a !== r.b));

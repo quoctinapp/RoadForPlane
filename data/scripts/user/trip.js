@@ -43,6 +43,20 @@ function reroute(route, legIndex, graph, target) {
   return { at: at, result: result, newRoute: routeFromLegs(route.path[0], flown.concat(result.legs)) };
 }
 
+function legHit(flight, incident) {
+  if (flight.date !== incident.date) return false;
+  if (incident.type === 'close') return flight.from === incident.code || flight.to === incident.code;
+  return flight.from === incident.from && flight.to === incident.to && (!incident.flightId || incident.flightId === flight.id);
+}
+
+function affectedLegIndex(route, incident) {
+  if (incident.type === 'close') {
+    const arriving = route.legs.findIndex(f => f.date === incident.date && f.to === incident.code);
+    if (arriving >= 0) return arriving;
+  }
+  return route.legs.findIndex(f => legHit(f, incident));
+}
+
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { buildSegments, routeFromLegs, samePath, solveSegment, reroute };
+  module.exports = { buildSegments, routeFromLegs, samePath, solveSegment, reroute, legHit, affectedLegIndex };
 }
