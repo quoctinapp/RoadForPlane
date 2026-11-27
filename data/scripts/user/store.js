@@ -35,8 +35,9 @@ const Store = {
     }
 
     this.watch('airports', docs => {
-      this.seeded = docs.length > 0;
-      this.airports = docs.length ? docs : DEFAULT_AIRPORTS.map(a => ({ ...a, active: true }));
+      const valid = docs.filter(a => typeof a.code === 'string' && Number.isFinite(Number(a.lat)) && Number.isFinite(Number(a.lng)));
+      this.seeded = valid.length > 0;
+      this.airports = valid.length ? valid : DEFAULT_AIRPORTS.map(a => ({ ...a, active: true }));
       this.rebuild();
     });
     this.watch('routes', docs => {
