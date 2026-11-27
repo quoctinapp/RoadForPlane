@@ -660,7 +660,7 @@ const App = {
     const params = { from: inc.from, to: inc.to, code: inc.code, date: this.shortDate(inc.date) };
     if (inc.type === 'cancel' && inc.flightId) return t('descCancelFlight', { ...params, id: inc.flightId });
     const key = { cancel: 'descCancel', delay: 'descDelay', surge: 'descSurge', close: 'descClose' }[inc.type];
-    return t(key, params) + (inc.note ? ' – ' + inc.note : '');
+    return t(key, params) + (inc.note ? ' – ' + esc(inc.note) : '');
   },
 
   renderIncidents() {
@@ -745,4 +745,5 @@ const App = {
 
 App.init();
 Account.init();
+Admin.init();
 Store.init();

@@ -102,7 +102,7 @@ const Account = {
     const tier = Store.tier();
     const chip = document.createElement('span');
     chip.className = 'user-chip';
-    chip.innerHTML = '<b>' + (profile.name || Store.user.email) + '</b>' +
+    chip.innerHTML = '<b>' + esc(profile.name || Store.user.email) + '</b>' +
       '<span class="tier-badge tier-' + tier + '">' + t('tier_' + tier) + '</span>' +
       (Store.isAdmin() ? '<span class="tier-badge tier-admin">' + t('adminRole') + '</span>' : '');
     area.appendChild(chip);

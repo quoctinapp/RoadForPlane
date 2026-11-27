@@ -7,6 +7,7 @@
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="data/ui/lib/leaflet.css">
   <link rel="stylesheet" href="data/ui/user/style.css">
+  <link rel="stylesheet" href="data/ui/admin/admin.css">
 </head>
 <body>
   <header class="topbar">
@@ -144,6 +145,17 @@
       </section>
     </aside>
   </main>
+  <section id="adminView" class="admin-view" hidden>
+    <aside class="admin-nav">
+      <h2 data-i18n="adminTitle"></h2>
+      <nav id="adminTabs" class="admin-tabs"></nav>
+      <button type="button" id="backToSearch" class="ghost-btn small" data-i18n="backToSearch"></button>
+    </aside>
+    <div class="admin-main">
+      <p id="adminGate" class="message warn" hidden></p>
+      <div id="adminContent"></div>
+    </div>
+  </section>
   <div id="authModal" class="modal" hidden>
     <div class="modal-box">
       <button type="button" class="modal-close" data-close-modal="authModal" data-i18n-title="close">✕</button>
@@ -180,6 +192,9 @@
   <script src="data/scripts/user/map.js"></script>
   <script src="data/scripts/user/simulation.js"></script>
   <script src="data/scripts/user/account.js"></script>
+  <script src="data/scripts/admin/admin.js"></script>
+  <script src="data/scripts/admin/admin-network.js"></script>
+  <script src="data/scripts/admin/admin-business.js"></script>
   <script src="data/scripts/user/app.js"></script>
 </body>
 </html>

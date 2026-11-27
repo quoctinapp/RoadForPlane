@@ -181,12 +181,15 @@ function rebuildNetwork(airports, routeDefs) {
     Number.isFinite(Number(a.lat)) && Number.isFinite(Number(a.lng));
   CITIES.length = 0;
   for (const airport of airports.filter(valid)) {
+    const clean = (text) => String(text == null ? '' : text).replace(/[<>"'&]/g, '');
+    const name = airport.name && airport.name.vi ? airport.name : { vi: airport.code, en: airport.code };
     CITIES.push({
       label: 'right',
-      airport: airport.code,
-      province: '',
       ...airport,
-      name: airport.name && airport.name.vi ? airport.name : { vi: airport.code, en: airport.code },
+      code: clean(airport.code),
+      airport: clean(airport.airport || airport.code),
+      province: clean(airport.province),
+      name: { vi: clean(name.vi), en: clean(name.en || name.vi) },
       lat: Number(airport.lat),
       lng: Number(airport.lng)
     });

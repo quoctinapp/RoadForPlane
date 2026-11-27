@@ -1,5 +1,11 @@
 const I18N = { vi: LANG_VI, en: LANG_EN };
 
+function esc(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 let currentLang = localStorage.getItem('lang') || 'vi';
 
 function t(key, params) {

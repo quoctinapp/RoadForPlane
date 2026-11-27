@@ -7,6 +7,7 @@ const Store = {
   airports: DEFAULT_AIRPORTS.map(a => ({ ...a, active: true })),
   routes: defaultRouteDefs(),
   seeded: false,
+  routesSeeded: false,
   incidents: [],
   promotions: [],
   pricing: DEFAULT_PRICING,
@@ -39,6 +40,7 @@ const Store = {
       this.rebuild();
     });
     this.watch('routes', docs => {
+      this.routesSeeded = docs.length > 0;
       this.routes = docs.length ? docs : defaultRouteDefs();
       this.rebuild();
     });
@@ -69,6 +71,17 @@ const Store = {
       snap => callback(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))),
       err => this.fail(err)
     );
+  },
+
+  watchCollection(name, callback) {
+    return this.db.collection(name).onSnapshot(
+      snap => callback(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))),
+      err => this.fail(err)
+    );
+  },
+
+  networkSeeded() {
+    return this.seeded && this.routesSeeded;
   },
 
   fail(err) {
